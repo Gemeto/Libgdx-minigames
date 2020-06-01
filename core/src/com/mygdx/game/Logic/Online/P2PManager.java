@@ -3,10 +3,8 @@ package com.mygdx.game.Logic.Online;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Net;
 import com.mygdx.game.Logic.GameObjects.Characters.JellyObj;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 public class P2PManager {
@@ -16,7 +14,7 @@ public class P2PManager {
     public Map<Integer, JellyObj> jellyEnemies;
     private static int sessionID;
     private static ArrayList<String> sessEnemyIDs;
-    private static String ip = "84.126.250.199";
+    private static String ip = "84.120.3.62";
     int nEnemies;
 
     public P2PManager(JellyObj j, Map<Integer, JellyObj> jEnemies){
