@@ -6,6 +6,8 @@ import com.mygdx.game.Logic.GameObjects.Characters.JellyObj;
 import com.mygdx.game.Logic.GameObjects.GameObj;
 import com.mygdx.game.Logic.GameObjects.TileObj;
 import com.mygdx.game.Logic.MovementStrategies.MovementStrategyInterface;
+import com.mygdx.game.Logic.Physics.CarColManager;
+import com.mygdx.game.Logic.Physics.CollisionManager;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -17,9 +19,9 @@ import static java.lang.StrictMath.toRadians;
 public class CarMovementStrategy implements MovementStrategyInterface {
 
     GameObj gameObj;
-    ArrayList<TileObj> tiles;
     public ArrayList<JellyObj> enemies;
     public int driftPoints;
+    private CollisionManager cM;
 
     public CarMovementStrategy(GameObj gameObj){
         gameObj.power = 0;
@@ -27,6 +29,7 @@ public class CarMovementStrategy implements MovementStrategyInterface {
         this.gameObj.velocityX = 0;
         this.gameObj.velocityY = 0;
         enemies = new ArrayList<>();
+        this.cM = new CarColManager(gameObj);
     }
 
     private void moveUp() {
@@ -71,114 +74,30 @@ public class CarMovementStrategy implements MovementStrategyInterface {
                 break;
         }
         if (move) {
-            gameObj.positionX += gameObj.velocityX;
-            gameObj.positionY += gameObj.velocityY;
-
-            //if(gameObj.positionX < 15 ||
-            if(collisionLeft()){
-                impactReaction(Direction.LEFT);
-            } //else if(gameObj.positionY < 0 ||
-            else if(collisionDown()){
-                impactReaction(Direction.DOWN);
-            } //else if(gameObj.positionY > GameConfig.WORLDHEIGHT ||
-            else if(collisionUp()){
-                impactReaction(Direction.UP);
-            } //else if(gameObj.positionX > GameConfig.WORLDWIDTH ||
-            else if(collisionRight()){
-                impactReaction(Direction.RIGHT);
+            this.cM.manageCollisions();
+            this.gameObj.positionX += this.gameObj.velocityX;
+            this.gameObj.positionY += this.gameObj.velocityY;
+            this.gameObj.velocityX *= this.gameObj.drag;
+            this.gameObj.velocityY *= this.gameObj.drag;
+            this.gameObj.angle += this.gameObj.angularVelocity;
+            this.gameObj.angularVelocity *= this.gameObj.angularDrag;
+            GameObj gameObj2 = this.gameObj;
+            gameObj2.velocityX = (float) (((double) gameObj2.velocityX) + (Math.sin(Math.toRadians((double) (-this.gameObj.angle))) * ((double) this.gameObj.power)));
+            GameObj gameObj3 = this.gameObj;
+            gameObj3.velocityY = (float) (((double) gameObj3.velocityY) + (Math.cos(Math.toRadians((double) this.gameObj.angle)) * ((double) this.gameObj.power)));
+            float velAngle = (float) Math.toDegrees(Math.atan2((double) (this.gameObj.positionY - (this.gameObj.positionY + this.gameObj.velocityY)), (double) (this.gameObj.positionX - (this.gameObj.positionX + this.gameObj.velocityX))));
+            float angle2 = (float) Math.toDegrees(Math.atan2(((double) this.gameObj.positionY) - (((double) this.gameObj.positionY) + (((double) (this.gameObj.height / 2)) * Math.cos(Math.toRadians((double) this.gameObj.angle)))), ((double) this.gameObj.positionX) - (((double) this.gameObj.positionX) + (((double) (this.gameObj.height / 2)) * Math.sin(Math.toRadians((double) (-this.gameObj.angle)))))));
+            if (Math.abs(velAngle - angle2) <= 30.0f) {
+                return;
             }
-            gameObj.velocityX *= gameObj.drag;
-            gameObj.velocityY *= gameObj.drag;
-            gameObj.angle += gameObj.angularVelocity;
-            gameObj.angularVelocity *= gameObj.angularDrag;
-
-            gameObj.velocityX += (Math.sin(Math.toRadians(-gameObj.angle)) * gameObj.power);
-            gameObj.velocityY += (Math.cos(Math.toRadians(gameObj.angle)) * gameObj.power);
-
-            float velAngle = (float) Math.toDegrees(Math.atan2(gameObj.positionY - (gameObj.positionY+gameObj.velocityY), gameObj.positionX - (gameObj.positionX+gameObj.velocityX)));
-            float angle2 = (float) Math.toDegrees(Math.atan2(gameObj.positionY - (gameObj.positionY+(gameObj.height/2)*Math.cos(Math.toRadians(gameObj.angle))), gameObj.positionX -(gameObj.positionX+(gameObj.height/2)*Math.sin(Math.toRadians(-gameObj.angle)))));
-
-            if((Math.abs(velAngle - angle2) > 30) && (Math.abs(gameObj.velocityX) > 7.5 || Math.abs(gameObj.velocityY) > 7.5)) {
-                driftPoints++;
-                System.out.println(driftPoints + " " + velAngle + " " + angle2);
+            if (((double) Math.abs(this.gameObj.velocityX)) > 7.5d || ((double) Math.abs(this.gameObj.velocityY)) > 7.5d) {
+                this.driftPoints++;
             }
-
         }
     }
 
-    public void impactReaction(Direction direction){
-        Random random = new Random();
-        int newAngle = random.nextInt((60 - 0 + 1) + 0);
-        switch(direction){
-            case UP:
-                gameObj.velocityY *= -1;
-                gameObj.velocityX = (float)(gameObj.velocityY * sin(toRadians(-newAngle)));
-                break;
-            case DOWN:
-                gameObj.velocityY *= -1;
-                gameObj.velocityX = (float)(gameObj.velocityY * sin(toRadians(-newAngle)));
-                break;
-            case RIGHT:
-                gameObj.velocityX *= -1;
-                gameObj.velocityY = (float)(gameObj.velocityX * cos(toRadians(newAngle)));
-                break;
-            case LEFT:
-                gameObj.velocityX *= -1;
-                gameObj.velocityY = (float)(gameObj.velocityX * cos(toRadians(newAngle)));
-                break;
-        }
-    }
-
-    public void setTiles(ArrayList<TileObj> tiles){
-        this.tiles = tiles;
-    }
-
-    private boolean collisionUp(){
-        for(TileObj t : tiles) {
-            if ((gameObj.positionY >= t.positionY - t.height/2 && gameObj.positionY <= t.positionY) && (gameObj.positionX >= t.positionX - t.width/2 && gameObj.positionX <= t.positionX + t.width / 2))
-                return true;
-        }
-        for(JellyObj t:enemies){
-            if ((gameObj.positionY >= t.positionY - t.height/2 && gameObj.positionY <= t.positionY) && (gameObj.positionX >= t.positionX - t.width/2 && gameObj.positionX <= t.positionX + t.width / 2))
-                return true;
-        }
-        return false;
-    }
-
-    private boolean collisionDown(){
-        for(TileObj t : tiles) {
-            if ((gameObj.positionY >= t.positionY && gameObj.positionY <= t.positionY + t.height/2) && (gameObj.positionX >= t.positionX - t.width/2 && gameObj.positionX <= t.positionX + t.width / 2))
-                return true;
-        }
-        for(JellyObj t : enemies) {
-            if ((gameObj.positionY >= t.positionY && gameObj.positionY <= t.positionY + t.height/2) && (gameObj.positionX >= t.positionX - t.width/2 && gameObj.positionX <= t.positionX + t.width / 2))
-                return true;
-        }
-        return false;
-    }
-
-    private boolean collisionRight(){
-        for(TileObj t : tiles) {
-            if ((gameObj.positionX >= t.positionX - t.width/2 && gameObj.positionX <= t.positionX) && (gameObj.positionY >= t.positionY - t.height/2 && gameObj.positionY <= t.positionY + t.height / 2))
-                return true;
-        }
-        for(JellyObj t : enemies) {
-            if ((gameObj.positionX >= t.positionX - t.width/2 && gameObj.positionX <= t.positionX) && (gameObj.positionY >= t.positionY - t.height/2 && gameObj.positionY <= t.positionY + t.height / 2))
-                return true;
-        }
-        return false;
-    }
-
-    private boolean collisionLeft(){
-        for(TileObj t : tiles) {
-            if ((gameObj.positionX >= t.positionX && gameObj.positionX <= t.positionX + t.width/2) && (gameObj.positionY >= t.positionY - t.height/2 && gameObj.positionY <= t.positionY + t.height / 2))
-                return true;
-        }
-        for(JellyObj t : enemies) {
-            if ((gameObj.positionX >= t.positionX && gameObj.positionX <= t.positionX + t.width/2) && (gameObj.positionY >= t.positionY - t.height/2 && gameObj.positionY <= t.positionY + t.height / 2))
-                return true;
-        }
-        return false;
+    public void setSolidObjects(ArrayList<GameObj> gameObjs) {
+        this.cM.setPosColl(gameObjs);
     }
 
 }

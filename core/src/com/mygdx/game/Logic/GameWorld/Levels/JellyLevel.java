@@ -24,7 +24,7 @@ import java.util.Random;
 
 public class JellyLevel extends Level {
 
-    ArrayList<TileObj> tiles;
+    ArrayList<GameObj> tiles;
 
     public JellyLevel(SpriteBatch batch){
         super(batch);
@@ -48,7 +48,7 @@ public class JellyLevel extends Level {
         jMS.setTiles(tiles);
         JellyObj j = (JellyObj) gameObjects.get("jelly");
         CarMovementStrategy jMSC = (CarMovementStrategy)j.bullet.movementStrategy;
-        jMSC.setTiles(tiles);
+        jMSC.setSolidObjects(tiles);
 
         //PowerUps
         powerUps = new ArrayList<>();
@@ -65,7 +65,7 @@ public class JellyLevel extends Level {
     public void draw() {
 
         //Tiles
-        for(TileObj t: tiles)
+        for(GameObj t: tiles)
             t.draw(batch);
 
         JellyObj jelly;

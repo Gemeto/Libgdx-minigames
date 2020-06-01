@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/GdxGamePC-Android.iml" filepath="$PROJECT_DIR$/GdxGamePC-Android.iml" group="GdxGamePC-Android" />
-      <module fileurl="file://$PROJECT_DIR$/android/android.iml" filepath="$PROJECT_DIR$/android/android.iml" group="GdxGamePC-Android/android" />
-      <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" group="GdxGamePC-Android/core" />
-      <module fileurl="file://$PROJECT_DIR$/desktop/desktop.iml" filepath="$PROJECT_DIR$/desktop/desktop.iml" group="GdxGamePC-Android/desktop" />
+      <module fileurl="file://$PROJECT_DIR$/Libgdx-minigames.iml" filepath="$PROJECT_DIR$/Libgdx-minigames.iml" group="Libgdx-minigames" />
+      <module fileurl="file://$PROJECT_DIR$/android/android.iml" filepath="$PROJECT_DIR$/android/android.iml" group="Libgdx-minigames/android" />
+      <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" group="Libgdx-minigames/core" />
+      <module fileurl="file://$PROJECT_DIR$/desktop/desktop.iml" filepath="$PROJECT_DIR$/desktop/desktop.iml" group="Libgdx-minigames/desktop" />
     </modules>
   </component>
 </project>

@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class JellyfishMovementStrategy implements MovementStrategyInterface {
 
     GameObj gameObj;
-    ArrayList<TileObj> tiles;
+    ArrayList<GameObj> tiles;
 
     public JellyfishMovementStrategy(GameObj gameObj){
         this.gameObj = gameObj;
@@ -73,12 +73,12 @@ public class JellyfishMovementStrategy implements MovementStrategyInterface {
         }
     }
 
-    public void setTiles(ArrayList<TileObj> tiles){
+    public void setTiles(ArrayList<GameObj> tiles){
         this.tiles = tiles;
     }
 
     private boolean collisionUp(){
-        for(TileObj t : tiles) {
+        for(GameObj t : tiles) {
             if ((gameObj.positionY >= t.positionY - t.height/2 && gameObj.positionY <= t.positionY) &&
                     (gameObj.positionX >= t.positionX - t.width/2 && gameObj.positionX <= t.positionX + t.width / 2))
                 return true;
@@ -87,7 +87,7 @@ public class JellyfishMovementStrategy implements MovementStrategyInterface {
     }
 
     private boolean collisionDown(){
-        for(TileObj t : tiles) {
+        for(GameObj t : tiles) {
             if ((gameObj.positionY >= t.positionY && gameObj.positionY <= t.positionY + t.height/2) &&
                     (gameObj.positionX >= t.positionX - t.width/2 && gameObj.positionX <= t.positionX + t.width / 2))
                 return true;
@@ -96,7 +96,7 @@ public class JellyfishMovementStrategy implements MovementStrategyInterface {
     }
 
     private boolean collisionRight(){
-        for(TileObj t : tiles) {
+        for(GameObj t : tiles) {
             if ((gameObj.positionX >= t.positionX - t.width/2 && gameObj.positionX <= t.positionX) &&
                     (gameObj.positionY >= t.positionY - t.height/2 && gameObj.positionY <= t.positionY + t.height / 2))
                 return true;
@@ -105,7 +105,7 @@ public class JellyfishMovementStrategy implements MovementStrategyInterface {
     }
 
     private boolean collisionLeft(){
-        for(TileObj t : tiles) {
+        for(GameObj t : tiles) {
             if ((gameObj.positionX >= t.positionX && gameObj.positionX <= t.positionX + t.width/2) &&
                     (gameObj.positionY >= t.positionY - t.height/2 && gameObj.positionY <= t.positionY + t.height / 2))
                 return true;

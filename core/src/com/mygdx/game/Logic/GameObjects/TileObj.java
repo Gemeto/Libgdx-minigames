@@ -9,6 +9,9 @@ public class TileObj extends GameObj{
 
     public TileObj(int width, int heght, double x, double y) {
         super(width, heght, x, y);
+    }
+
+    public void setDefaultImage(){
         img5 = new Texture("badlogic.jpg");
         sprite = new Sprite(img5);
     }

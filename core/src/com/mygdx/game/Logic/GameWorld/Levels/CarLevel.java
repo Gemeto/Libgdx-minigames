@@ -19,6 +19,7 @@ import com.mygdx.game.Logic.GameObjects.TileObj;
 import com.mygdx.game.Logic.Input.InputManager;
 import com.mygdx.game.Logic.MovementStrategies.CarMovementStrategy;
 import com.mygdx.game.Logic.MovementStrategies.JellyfishMovementStrategy;
+import com.mygdx.game.Utils.TileManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,11 +28,12 @@ import java.util.Random;
 
 public class CarLevel extends Level {
 
-    ArrayList<TileObj> tiles;
+    ArrayList<GameObj> tiles;
     Sprite background;
     Texture bG;
     BulletObj b;
     BulletObj b2;
+    TileManager tM;
 
     public CarLevel(SpriteBatch batch){
         super(batch);
@@ -45,24 +47,19 @@ public class CarLevel extends Level {
         background = new Sprite(bG);
 
         //Tiles
-        tiles = new ArrayList<>();
-        int tileHalfWidth = GameConfig.WORLDWIDTH/32;
-        int tileHalfHeight = GameConfig.WORLDHEIGHT/32;
-        for(int y = tileHalfHeight; y < GameConfig.WORLDHEIGHT; y += tileHalfHeight * 16) {
-            for (int x = GameConfig.WORLDWIDTH - tileHalfWidth; x > 0; x -= tileHalfWidth * 16)
-                tiles.add(new TileObj(tileHalfWidth * 2, tileHalfHeight * 2, x, y));
-        }
+        tM = new TileManager();
+        tiles = tM.loadTilesFromTxtSlow("sample2.txt");
         //MechanicsSection
         //Controllers for android
         gameObjects.put("shootController", new PadController(320, 320, GameConfig.WORLDWIDTH * 0.85, GameConfig.WORLDHEIGHT * 0.15));
         gameObjects.put("moveController", new PadController(320, 320, GameConfig.WORLDWIDTH * 0.15, GameConfig.WORLDHEIGHT * 0.15));
         //Players
-        gameObjects.put("jelly", new JellyObj(100, 180, GameConfig.WORLDWIDTH * 0.5, GameConfig.WORLDHEIGHT * 0.15));
+        gameObjects.put("jelly", new JellyObj(100, 180, 960.0d, 432.0d));
         CarMovementStrategy jMS = (CarMovementStrategy)gameObjects.get("jelly").movementStrategy;
-        jMS.setTiles(tiles);
+        jMS.setSolidObjects(tiles);
         JellyObj j = (JellyObj) gameObjects.get("jelly");
         jMS = (CarMovementStrategy)j.bullet.movementStrategy;
-        jMS.setTiles(tiles);
+        jMS.setSolidObjects(tiles);
 
         //PowerUps
         powerUps = new ArrayList<>();
@@ -72,7 +69,7 @@ public class CarLevel extends Level {
         for (int i = 0; i < enemies.length; i++) {
           enemies[i] = new EnemyObj(120, 160);
           jMS = (CarMovementStrategy)enemies[i].movementStrategy;
-          jMS.setTiles(tiles);
+          jMS.setSolidObjects(tiles);
         }
         onlineEnemies = new HashMap<>();
 
@@ -84,6 +81,8 @@ public class CarLevel extends Level {
     }
 
     public void draw() {
+        tM.drawTiles();
+
         moveCameraToCharacter();
 
         //Background
@@ -91,8 +90,11 @@ public class CarLevel extends Level {
 
 
         //Tiles
-        for(TileObj t: tiles)
-            t.draw(batch);
+        GameObj jely = gameObjects.get("jelly");
+        for(GameObj t: tiles) {
+            if (t.positionX > jely.positionX - 960.0f && t.positionX < jely.positionX + 960.0f && t.positionY > jely.positionY - 540.0f && t.positionY < jely.positionY + 540.0f)
+                t.draw(batch);
+        }
 
         JellyObj jelly;
         for (Map.Entry<String, GameObj> entry : gameObjects.entrySet())
