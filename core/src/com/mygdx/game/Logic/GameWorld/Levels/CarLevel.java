@@ -53,6 +53,7 @@ public class CarLevel extends Level {
         //Controllers for android
         gameObjects.put("shootController", new PadController(320, 320, GameConfig.WORLDWIDTH * 0.85, GameConfig.WORLDHEIGHT * 0.15));
         gameObjects.put("moveController", new PadController(320, 320, GameConfig.WORLDWIDTH * 0.15, GameConfig.WORLDHEIGHT * 0.15));
+        gameObjects.put("interactController", new PadController(120, 120, GameConfig.WORLDWIDTH * 0.95, GameConfig.WORLDHEIGHT * 0.35));
         //Players
         gameObjects.put("jelly", new JellyObj(100, 180, 960.0d, 432.0d));
         CarMovementStrategy jMS = (CarMovementStrategy)gameObjects.get("jelly").movementStrategy;
@@ -74,7 +75,7 @@ public class CarLevel extends Level {
         onlineEnemies = new HashMap<>();
 
         //Input
-        inputManager = new InputManager((PadController)gameObjects.get("moveController"), (PadController)gameObjects.get("shootController"), (JellyObj) gameObjects.get("jelly"));
+        inputManager = new InputManager((PadController)gameObjects.get("moveController"), (PadController)gameObjects.get("shootController"), (PadController)gameObjects.get("interactController"), (JellyObj) gameObjects.get("jelly"));
 
         b = new BulletObj(10, 10);
         b2 = new BulletObj(10, 10);
@@ -101,11 +102,13 @@ public class CarLevel extends Level {
             if (entry.getValue() instanceof JellyObj) {
                 jelly = (JellyObj) entry.getValue();
                 jelly.drawJelly(batch);
-                CarMovementStrategy cMS = (CarMovementStrategy) jelly.movementStrategy;
-                GlyphLayout g = new GlyphLayout();
-                g.setText(font, "Puntos de drift: " + cMS.driftPoints);
-                font.draw(batch, "Puntos de drift: " + cMS.driftPoints, jelly.positionX - jelly.width, jelly.positionY + jelly.height/1.65f);
-                debugDriftPointsDraw(jelly);
+                if(jelly.movementStrategy instanceof CarMovementStrategy) {
+                    CarMovementStrategy cMS = (CarMovementStrategy) jelly.movementStrategy;
+                    GlyphLayout g = new GlyphLayout();
+                    g.setText(font, "Puntos de drift: " + cMS.driftPoints);
+                    font.draw(batch, "Puntos de drift: " + cMS.driftPoints, jelly.positionX - jelly.width, jelly.positionY + jelly.height / 1.65f);
+                    debugDriftPointsDraw(jelly);
+                }
         }else {
                 entry.getValue().draw(batch);
             }
@@ -123,8 +126,8 @@ public class CarLevel extends Level {
         b.positionX=(float)(jelly.positionX + (jelly.height/2) * Math.sin(Math.toRadians(-jelly.angle)));
         b.positionY=(float)(jelly.positionY + (jelly.height/2) * Math.cos(Math.toRadians(jelly.angle)));
         b.draw(batch);
-        b2.positionX=(float)(jelly.positionX+jelly.velocityX);
-        b2.positionY=(float)(jelly.positionY+jelly.velocityY);
+        b2.positionX=(jelly.positionX+jelly.velocityX);
+        b2.positionY=(jelly.positionY+jelly.velocityY);
         b2.draw(batch);
     }
 
@@ -133,6 +136,8 @@ public class CarLevel extends Level {
         mC.moveMControllerToCharacter(gameObjects.get("jelly").positionX, gameObjects.get("jelly").positionY);
         mC = (PadController) gameObjects.get("shootController");
         mC.moveMControllerToCharacter(gameObjects.get("jelly").positionX, gameObjects.get("jelly").positionY);
+        mC = (PadController) gameObjects.get("interactController");
+        mC.moveMControllerToCharacter(gameObjects.get("jelly").positionX, gameObjects.get("jelly").positionY);
         ortographicCamera.position.x = gameObjects.get("jelly").positionX;
         ortographicCamera.position.y = gameObjects.get("jelly").positionY;
         ortographicCamera.update();
@@ -140,17 +145,54 @@ public class CarLevel extends Level {
 
     public void manageInput(){
         //Input
-        inputManager.manageInput2();
+        if(gameObjects.get("jelly").a)
+            inputManager.manageInput();
+        else
+            inputManager.manageInput2();
         PadController movement = (PadController)gameObjects.get("moveController");
         PadController movementX = (PadController)gameObjects.get("shootController");
+        PadController interact = (PadController)gameObjects.get("interactController");
         JellyObj character = (JellyObj)gameObjects.get("jelly");
-        if(movementX.getDirectionX() != Direction.NONE)
-            character.moveJelly(movementX.getDirectionX());
-        if(movement.getDirectionY() != Direction.NONE)
-            character.moveJelly(movement.getDirectionY());
-        character.moveJelly(Direction.NONE);
+        if(gameObjects.get("jelly").a){
+            if(movement.getDirectionX() != Direction.NONE && Math.abs(movement.getOrientationPercentageX(movement.lastX)) > Math.abs(movement.getOrientationPercentageY(movement.lastY)))
+                character.moveJelly(movement.getDirectionX());
+            else if(movement.getDirectionY() != Direction.NONE && Math.abs(movement.getOrientationPercentageY(movement.lastY)) > Math.abs(movement.getOrientationPercentageX(movement.lastX)))
+                character.moveJelly(movement.getDirectionY());
+            character.moveJelly(Direction.NONE);
+            Direction[] d = {movement.getDirectionX(), movement.getDirectionY()};
+            character.updateAnim(d);
+            character.posicionZ = 0;
+        }else{
+            if (movementX.getDirectionX() != Direction.NONE)
+                character.moveJelly(movementX.getDirectionX());
+            if (movement.getDirectionY() != Direction.NONE)
+                character.moveJelly(movement.getDirectionY());
+            character.moveJelly(Direction.NONE);
+        }
 
+        if(interact.isPressed){
+            interactuar();
+            interact.isPressed = false;
+        }
+    }
 
+    private void interactuar(){
+        JellyObj j = (JellyObj) gameObjects.get("jelly");
+        j.a = !j.a;
+        if (j.a) {
+            j.movementStrategy = new JellyfishMovementStrategy(j, false);
+            j.angle = 0;
+            JellyfishMovementStrategy jMS = (JellyfishMovementStrategy)gameObjects.get("jelly").movementStrategy;
+            jMS.setTiles(tiles);
+            CarMovementStrategy bMS = (CarMovementStrategy)j.bullet.movementStrategy;
+            bMS.setSolidObjects(tiles);
+        } else {
+            j.movementStrategy = new CarMovementStrategy(j);
+            CarMovementStrategy jMS = (CarMovementStrategy)gameObjects.get("jelly").movementStrategy;
+            jMS.setSolidObjects(tiles);
+            jMS = (CarMovementStrategy)j.bullet.movementStrategy;
+            jMS.setSolidObjects(tiles);
+        }
     }
 
     public void managePowerUps(){
@@ -161,12 +203,11 @@ public class CarLevel extends Level {
             y = new Random().nextInt((GameConfig.WORLDHEIGHT - 0 + 1) + 0);
             if (new Random().nextInt((2 - 1 + 1) + 1) == 1) {
                 powerUps.add(new TripleVelocityPU(x, y));
-                gameObjects.put("powerUp"+powerUps.size(), powerUps.get(powerUps.size()-1));
             }
             else {
                 powerUps.add(new TripleSizePU(x, y));
-                gameObjects.put("powerUp"+powerUps.size(), powerUps.get(powerUps.size()-1));
             }
+            gameObjects.put("powerUp"+powerUps.size(), powerUps.get(powerUps.size()-1));
         }
 
         for(PowerUp p:powerUps) {

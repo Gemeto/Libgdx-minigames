@@ -16,12 +16,20 @@ public class InputManager extends InputAdapter {
 
     PadController moveController;
     PadController shootController;
+    PadController interactController;
     JellyObj jelly;
     public boolean changeLevel;
 
     public InputManager(PadController moveController, PadController shootController, JellyObj jelly){
         this.moveController = moveController;
         this.shootController = shootController;
+        this.jelly = jelly;
+    }
+
+    public InputManager(PadController moveController, PadController shootController, PadController interactController, JellyObj jelly){
+        this.moveController = moveController;
+        this.shootController = shootController;
+        this.interactController = interactController;
         this.jelly = jelly;
     }
 
@@ -64,12 +72,19 @@ public class InputManager extends InputAdapter {
                 }else{
                     moveController.lastX = moveController.touchX;
                     moveController. lastY = moveController.touchY;
+                    if(interactController != null)
+                        interactController.isPressed = false;
                 }
 
                 if(jelly.isCollision(screenX*GameConfig.WIDTHPERCENTAGETOSCREEN, GameConfig.WORLDHEIGHT - screenY*GameConfig.HEIGHTPERCENTAGETOSCREEN))
                     changeLevel = true;
                 if(shootController.estaPulsado(screenX*GameConfig.WIDTHPERCENTAGETOSCREEN, GameConfig.WORLDHEIGHT - screenY*GameConfig.HEIGHTPERCENTAGETOSCREEN))
                     jelly.weaponReturn();
+                if(interactController != null)
+                    if(interactController.estaPulsado(screenX*GameConfig.WIDTHPERCENTAGETOSCREEN, GameConfig.WORLDHEIGHT - screenY*GameConfig.HEIGHTPERCENTAGETOSCREEN)){
+                        interactController.isPressed = true;
+                    }
+
                 return true;
             }
 
@@ -101,6 +116,7 @@ public class InputManager extends InputAdapter {
             public boolean touchUp(int screenX, int screenY, int pointer, int button){
                 moveController.lastY = moveController.touchY;
                 shootController. lastX = shootController.touchX;
+                interactController.isPressed = false;
                 return true;
             }
             @Override
@@ -117,6 +133,11 @@ public class InputManager extends InputAdapter {
                     shootController.lastX = screenX*GameConfig.WIDTHPERCENTAGETOSCREEN;
                 else
                     shootController.lastX = shootController.touchX;
+
+                if(interactController.estaPulsado(screenX*GameConfig.WIDTHPERCENTAGETOSCREEN, GameConfig.WORLDHEIGHT - screenY*GameConfig.HEIGHTPERCENTAGETOSCREEN)){
+                    interactController.isPressed = true;
+                }
+
                 return true;
             }
 

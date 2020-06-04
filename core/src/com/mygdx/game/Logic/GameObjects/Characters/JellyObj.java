@@ -1,6 +1,5 @@
 package com.mygdx.game.Logic.GameObjects.Characters;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,6 +17,8 @@ public class JellyObj extends GameObj {
     public boolean dead = false;
     public ArrayList<PowerUp> pUps;
     public int nDeaths;
+    private boolean movingRight;
+    private boolean movingLeft;
 
     public JellyObj(int width, int heght) {
         super(width, heght);
@@ -111,7 +112,66 @@ public class JellyObj extends GameObj {
         bullet.positionY = positionY+posicionZ;
         bullet.positionX = positionX;
         canTransform = true;
-        pUps = new ArrayList<PowerUp>();
+        pUps = new ArrayList();
+    }
+
+    private void loadRunAnim(){
+        sprites = new Sprite[8];
+        sprites[0] = new Sprite(new Texture("ezgif.com-crop (1).png"));
+        sprites[1] = new Sprite(new Texture("ezgif.com-crop (2).png"));
+        sprites[2] = new Sprite(new Texture("ezgif.com-crop (3).png"));
+        sprites[3] = new Sprite(new Texture("ezgif.com-crop (4).png"));
+        sprites[4] = new Sprite(new Texture("ezgif.com-crop (5).png"));
+        sprites[5] = new Sprite(new Texture("ezgif.com-crop (6).png"));
+        sprites[6] = new Sprite(new Texture("ezgif.com-crop (7).png"));
+        sprites[7] = new Sprite(new Texture("ezgif.com-crop (8).png"));//Hasta aqui correr
+    }
+
+    private void loadRunLeftAnim(){
+        sprites = new Sprite[8];
+        sprites[0] = new Sprite(new Texture("ezgif.com-crop (1).png"));
+        sprites[1] = new Sprite(new Texture("ezgif.com-crop (2).png"));
+        sprites[2] = new Sprite(new Texture("ezgif.com-crop (3).png"));
+        sprites[3] = new Sprite(new Texture("ezgif.com-crop (4).png"));
+        sprites[4] = new Sprite(new Texture("ezgif.com-crop (5).png"));
+        sprites[5] = new Sprite(new Texture("ezgif.com-crop (6).png"));
+        sprites[6] = new Sprite(new Texture("ezgif.com-crop (7).png"));
+        sprites[7] = new Sprite(new Texture("ezgif.com-crop (8).png"));//Hasta aqui correr
+        for(Sprite s: sprites)
+            s.flip(true, false);
+    }
+
+    private void loadIdleAnim(){
+        sprites = new Sprite[3];
+        sprites[0] = new Sprite(new Texture("ezgif.com-crop (9).png"));
+        sprites[1] = new Sprite(new Texture("ezgif.com-crop (10).png"));
+        sprites[2] = new Sprite(new Texture("ezgif.com-crop (11).png"));//Hasta aqui idle
+    }
+
+    private void loadJumpAnim(){
+        sprites = new Sprite[3];
+        sprites[0] = new Sprite(new Texture("ezgif.com-crop (12).png"));
+        sprites[1] = new Sprite(new Texture("ezgif.com-crop (13).png"));
+        sprites[2] = new Sprite(new Texture("ezgif.com-crop (14).png"));//Hasta aqui salto
+    }
+
+    public void updateAnim(Direction[] directions){
+        for(Direction direction: directions)
+            if(direction != Direction.NONE && (!movingLeft||!movingRight)) {
+                if(direction == Direction.RIGHT) {
+                    loadRunAnim();
+                    movingRight = true;
+                    movingLeft = false;
+                }else if(direction == Direction.LEFT) {
+                    loadRunLeftAnim();
+                    movingLeft = true;
+                    movingRight = false;
+                }
+                return;
+            }
+        loadIdleAnim();
+        movingRight = false;
+        movingLeft = false;
     }
 
     public void kill(){

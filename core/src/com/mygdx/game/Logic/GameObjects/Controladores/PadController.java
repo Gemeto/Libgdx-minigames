@@ -18,14 +18,7 @@ public class PadController extends GameObj{
     public float touchX;
     public float touchY;
 
-    public PadController(int width, int heght) {
-        super(width, heght);
-        img5 = new Texture("boton_disparar.png");
-        sprite = new Sprite(img5);
-        movementStrategy = null;
-        lastX = positionX;
-        lastY = positionY;
-    }
+    public boolean isPressed;
 
     public PadController(int width, int heght, double x, double y){
         super(width, heght, x, y);

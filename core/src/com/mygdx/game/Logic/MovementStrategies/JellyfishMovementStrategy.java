@@ -12,31 +12,50 @@ public class JellyfishMovementStrategy implements MovementStrategyInterface {
 
     GameObj gameObj;
     ArrayList<GameObj> tiles;
+    private boolean screenIsLimit;
 
-    public JellyfishMovementStrategy(GameObj gameObj){
+    public JellyfishMovementStrategy(GameObj gameObj, boolean screenIsLimit){
         this.gameObj = gameObj;
         this.gameObj.power = 10;
         this.gameObj.angle = 0;
+        this.screenIsLimit = screenIsLimit;
     }
 
     public void moveUp() {
-        if(gameObj.positionY < 1080 && !collisionUp())
-            gameObj.positionY += gameObj.power;
+        if(!collisionUp())
+            if(screenIsLimit) {
+                if (gameObj.positionY < 1080)
+                    gameObj.positionY += gameObj.power;
+            }else
+                gameObj.positionY += gameObj.power;
     }
 
     public void moveDown() {
-        if(gameObj.positionY > 0 && !collisionDown())
-            gameObj.positionY -= gameObj.power;
+        if(!collisionDown())
+            if(screenIsLimit) {
+                if (gameObj.positionY > 0)
+                    gameObj.positionY -= gameObj.power;
+            }else
+                gameObj.positionY -= gameObj.power;
     }
 
     public void moveRight() {
-        if(gameObj.positionX < 1920 && !collisionRight())
-            gameObj.positionX += gameObj.power;
+        if(!collisionRight())
+            if(screenIsLimit) {
+                if (gameObj.positionX < 1920)
+                    gameObj.positionX += gameObj.power;
+            }else
+                gameObj.positionX += gameObj.power;
     }
 
     public void moveLeft() {
-        if(gameObj.positionX > 0 && !collisionLeft())
-            gameObj.positionX -= gameObj.power;
+        if(gameObj.positionX > 0)
+        if(!collisionLeft())
+            if(screenIsLimit) {
+                if (gameObj.positionX > 0)
+                    gameObj.positionX -= gameObj.power;
+            }else
+                gameObj.positionX -= gameObj.power;
     }
     int frame = 0;
     boolean arriba = true;

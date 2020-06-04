@@ -80,7 +80,13 @@ public abstract class GameObj {
     public void draw(SpriteBatch batch) {
         float f;
         if (this.a) {
+            this.animationFrame = this.animationFrame > this.sprites.length - 1 ? 0 : this.animationFrame;
             batch.draw(this.sprites[this.animationFrame], this.positionX - ((float) (this.width / 2)), (this.positionY + this.posicionZ) - ((float) (this.height / 2)), (float) (this.width / 2), (float) (this.height / 2), (float) this.width, (float) this.height, 1.0f, 1.0f, this.angle);
+            if (this.frameNum % (60/this.sprites.length) == 0) {
+                this.animationFrame = this.animationFrame >= this.sprites.length - 1 ? 0 : this.animationFrame + 1;
+            }
+            this.frameNum = this.frameNum == 60 ? 1 : this.frameNum + 1;
+
         } else if (this.sprite != null) {
             Color c = batch.getColor();
             float f2 = c.r;
@@ -94,10 +100,7 @@ public abstract class GameObj {
             batch.setColor(f2, f3, f4, f);
             batch.draw(this.sprite, this.positionX - ((float) (this.width / 2)), (this.positionY + this.posicionZ) - ((float) (this.height / 2)), (float) (this.width / 2), (float) (this.height / 2), (float) this.width, (float) this.height, 1.0f, 1.0f, this.angle);
         }
-        if (this.frameNum % 15 == 0) {
-            this.animationFrame = this.animationFrame == 3 ? 0 : this.animationFrame + 1;
-        }
-        this.frameNum = this.frameNum == 60 ? 1 : this.frameNum + 1;
+
         this.timeUntilTransform++;
     }
 
@@ -113,7 +116,7 @@ public abstract class GameObj {
         boolean z = true;
         if ((this.timeUntilTransform >= 120) && this.canTransform) {
             if (!this.a) {
-                this.movementStrategy = new JellyfishMovementStrategy(this);
+                this.movementStrategy = new JellyfishMovementStrategy(this, true);
             } else {
                 this.movementStrategy = new CarMovementStrategy(this);
             }
@@ -133,4 +136,5 @@ public abstract class GameObj {
         }
         return true;
     }
+
 }

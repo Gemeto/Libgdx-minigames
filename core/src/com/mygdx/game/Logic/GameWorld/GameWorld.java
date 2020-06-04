@@ -61,7 +61,7 @@ public class GameWorld {
         if(p2PManager.tries < 20)//Si no se conecta al servidor crashea el juego así que le damos 20 intentos como máximo.
             p2PManager.manageP2P();
 
-        if(state instanceof  CarLevel){
+        if(state instanceof  CarLevel && state.gameObjects.get("jelly").movementStrategy instanceof CarMovementStrategy){
             CarMovementStrategy cMS = (CarMovementStrategy) state.gameObjects.get("jelly").movementStrategy;
             cMS.enemies = new ArrayList<>();
             for(Map.Entry e:p2PManager.jellyEnemies.entrySet())
